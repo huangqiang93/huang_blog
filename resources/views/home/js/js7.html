@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<!-- saved from url=(0046)http://www.jq22.com/demo/FloatingText20161123/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>Floating Text</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            background: #222;
+        }
+
+        p {
+            /*padding: 1em;*/
+            font-family: monospace;
+            font-size: 2em;
+        }
+
+        button {
+            margin: auto;
+            text-align: center;
+            display: block;
+            width: 150px;
+            height: 45px;
+            background: orange;
+            border: 0;
+            cursor: pointer;
+            position: absolute;
+            left: 0;
+            right: 0;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 2em;
+        }
+
+        article {
+            width: 80%;
+            margin: auto;
+        }
+
+    </style>
+
+
+</head>
+
+<body>
+<article>
+    <p id="text">路漫漫其修远兮，吾将上下而求索。饮余马于咸池兮，总余辔乎扶桑。折若木以拂日兮，聊逍遥以相羊。前望舒使先驱兮，后飞廉使奔属。鸾皇为余先戒兮，雷师告余以未具。吾令凤鸟飞腾兮，继之以日夜。飘风屯其相离兮，帅云霓而来御。纷总总其离合兮，斑陆离其上下。吾令帝阍开关兮，倚阊阖而望予。时暧暧其将罢兮，结幽兰而延伫。世溷浊而不分兮，好蔽美而嫉妒。朝吾将济于白水兮，登阆风而绁马。</p>
+    <button id="reset" data-bound="true">放松一下</button>
+</article>
+
+<script type="text/javascript">
+    var time = 0;
+    function Gravity(id){
+        var that = this;
+        var element = document.getElementById(id);
+        var text = element.textContent;
+        var arr = text.split('');
+
+        this.animate = true;
+        this.floating = true;
+        this.resetTime = 0;
+
+        this.positionType = getComputedStyle(element).position;
+
+        this.lerp = function (e,t,i){
+            return(1-i)*e+i*t;
+        }
+        this.checkBound = function(){
+            if (element.hasAttribute("data-bound")) {
+                return element.dataset.bound === "true";
+            }
+        }
+
+        this.useBound = this.checkBound();
+        this.colors = [
+            '#f44336','#e91e63','#9c27b0',
+            '#673ab7','#3f51b5','#2196f3',
+            '#03a9f4','#00bcd4','#009688',
+            '#4caf50','#8bc34a','#cddc39',
+            '#ffeb3b','#ffc107','#ff9800',
+            '#ff5722','#795548','#9e9e9e',
+            '#607d8b'
+        ];
+
+        this.randomColor = function(){
+            var randNum = Math.floor(Math.random() * this.colors.length);
+            return this.colors[randNum];
+        }
+
+        this.bounds = this.useBound ? {
+            min : {
+                x : element.offsetLeft,
+                y : element.offsetTop
+            },
+            max : {
+                x : element.offsetLeft + element.offsetWidth,
+                y : element.offsetTop + element.offsetHeight
+            }
+        } : {
+            min : {
+                x : 0,
+                y : 0
+            },
+            max : {
+                x : window.innerWidth,
+                y : window.innerHeight
+            }
+        }
+
+        this.pointInCircle = function(point, target, radius) {
+            var distsq = (point.x - target.x) * (point.x - target.x) + (point.y - target.y) * (point.y - target.y);
+            return [distsq <= radius * radius, distsq];
+        }
+
+        function createSpan(text,pos){
+            var span = document.createElement('span');
+            span.innerHTML = text;
+            span.style.position = "relative";
+            span.style.display = "inline-block";
+            span.style.minWidth = "10px";
+            span.style.color = that.randomColor();
+            span._own = {
+                pos : {
+                    x : 0,
+                    y : 0
+                },
+                vel : {
+                    x : -0.5 + Math.random(),
+                    y : -0.5 + Math.random()
+                },
+                speed : {
+                    x : 1,
+                    y : 1
+                },
+                dir : {
+                    x : 1,
+                    y : 1
+                }
+            }
+            return span;
+        }
+        this.textSpans = [];
+
+        element.innerHTML = '';
+
+        arr.forEach(function(t,i){
+            var el = createSpan(t,{
+                x : 0,
+                y : 0
+            });
+            element.appendChild(el);
+            that.textSpans.push(el);
+        });
+
+        this.getDim = function(){
+
+            this.textSpans.forEach(function(t,i){
+                var offset = {
+                    x : 0,
+                    y : 0
+                }
+                if(that.positionType === 'relative' || that.positionType === 'absolute'){
+                    offset.x = element.offsetLeft
+                    offset.y = element.offsetTop
+                }
+                t._own.real = {
+                    x : offset.x +t.offsetLeft,
+                    y : offset.y +t.offsetTop
+                },
+                    t._own.size = {
+                        x : t.offsetWidth,
+                        y : t.offsetHeight
+                    }
+
+            });
+
+        };
+
+        this.getDim();
+
+        this.floatText = function(){
+            this.textSpans.forEach(function(t,i){
+
+                if(t._own.pos.x + t._own.real.x < that.bounds.min.x || t._own.pos.x + t._own.real.x + t._own.size.x > that.bounds.max.x){
+                    t._own.dir.x *= -1;
+                }
+                if(t._own.pos.y + t._own.real.y < that.bounds.min.y || t._own.pos.y + t._own.real.y + t._own.size.y > that.bounds.max.y){
+                    t._own.dir.y *= -1;
+                }
+                t._own.pos.x += (t._own.vel.x * t._own.speed.x) * t._own.dir.x;
+                t._own.pos.y += (t._own.vel.y * t._own.speed.y) * t._own.dir.y;
+                t.style.transform = 'translateX('+ t._own.pos.x +'px) translateY('+ t._own.pos.y +'px)';
+
+            });
+        }
+        this.update = function(){
+            if(this.animate){
+                if(this.floating){
+                    this.floatText();
+                }else{
+                    this.floatBackwards();
+                }
+            }
+        }
+
+        this.floatBackwards = function(){
+            this.textSpans.forEach(function(t,i){
+
+                var x = that.lerp(t._own.pos.x,0, that.resetTime / 10);
+                var y = that.lerp(t._own.pos.y,0, that.resetTime / 10);
+
+                t.style.transform = 'translateX('+ x +'px) translateY('+ y +'px)';
+
+            });
+
+            if(this.resetTime===10){
+                this.animate = false;
+                this.resetTime = 0;
+            }
+            this.resetTime++;
+        }
+        this.reset = function(){
+            this.floating = false;
+        }
+        this.restart = function(){
+            this.textSpans.forEach(function(t,i){
+                t._own.pos.x = 0;
+                t._own.pos.y = 0;
+            });
+            this.floating = true;
+            this.animate = true;
+        }
+
+        window.onresize = function(){
+            that.getDim();
+        }
+
+    }
+
+    var paragraph = new Gravity('text');
+    var gravity = new Gravity('reset');
+
+    var button = document.getElementById('reset');
+    button.addEventListener('click',function(){
+        if(gravity.animate){
+            gravity.reset();
+            paragraph.reset();
+        }else{
+            gravity.restart();
+            paragraph.restart();
+        }
+    });
+
+    var render = function (time) {
+        requestAnimationFrame( render );
+
+        animation(time);
+    };
+
+    //__________ animation
+
+    function animation(time){
+        paragraph.update();
+        gravity.update();
+    };
+
+    //__________
+
+    render(time);
+</script>
+
+
+
+</body></html>

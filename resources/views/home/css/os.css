@@ -1,0 +1,15 @@
+﻿/*YzmCMS博客模板*/
+.ui-tooltip{padding: 6px;font-size: 12px;line-height: 100%;position: absolute;z-index: 9999;max-width: 300px;-webkit-box-shadow: 0 0 5px #aaa;box-shadow: 0 0 5px #aaa;background: #fff;}
+body .ui-tooltip{border-width: 2px;}
+.login_box{clear: both;/*width: 250px;*/}
+.login_button{background:url(../images/login_button.png) no-repeat transparent;width: 120px;height: 40px;line-height:40px;cursor:pointer;display:inline-block;display:-moz-inline-stack;zoom:1; *display:inline;}
+.login_icon_qq{background-position: 0px 0px;margin-right:20px;}
+.login_icon_sina{background-position: 0px -45px;}
+.login_icon_wechat{background-position: 0px -1093px;}
+.lang_button{width: 20px;height: 20px;line-height: 20px;padding-right: 5px;cursor:pointer;display:inline-block;display:-moz-inline-stack;zoom:1; *display:inline;}
+.os_show{display: block;padding-left: 10px;margin-bottom: 20px;margin-left: 5px;border-left: 2px solid gray;}
+.os_float_button{background:url(../images/share_button.png) no-repeat transparent;width: 32px;height: 32px;line-height: 32px;padding-right: 5px;cursor:pointer;display:inline-block;display:-moz-inline-stack;zoom:1; *display:inline;}
+.float_icon_top{background-position: 0px -840px;}
+.float_icon_comment{background-position: 0px -882px;}
+#open_social_float_button{position: fixed;bottom: 38px;width: 35px;height: 90px;margin-left: -70px;display: none;}
+/*YzmCMS博客模板*/
